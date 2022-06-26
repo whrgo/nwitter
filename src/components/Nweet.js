@@ -1,21 +1,23 @@
-import { dbService, storageService } from "fbase";
 import React, { useState } from "react";
+import { dbService, storageService } from "fbase";
 
-const Nweet = ({ NweetObj, isOwner }) => {
+const Nweet = ({ nweetObj, isOwner }) => {
   const [editing, setEditing] = useState(false);
-  const [newNweet, setNewNweet] = useState(NweetObj.text);
+  const [newNweet, setNewNweet] = useState(nweetObj.text);
   const onDeleteClick = async () => {
-    const ok = window.confirm("Are you sure want to delete this nweet?");
+    const ok = window.confirm("Are you sure you want to delete this nweet?");
     if (ok) {
-      await dbService.doc(`nweets/${NweetObj.id}`).delete();
-      await storageService.refFromURL(NweetObj.attachmentUrl).delete();
+      await dbService.doc(`nweets/${nweetObj.id}`).delete();
+      await storageService.refFromURL(nweetObj.attachmentUrl).delete();
     }
   };
   const toggleEditing = () => setEditing((prev) => !prev);
   const onSubmit = async (event) => {
     event.preventDefault();
-    await dbService.doc(`nweets/${NweetObj.id}`).update({ text: newNweet });
-    toggleEditing();
+    await dbService.doc(`nweets/${nweetObj.id}`).update({
+      text: newNweet,
+    });
+    setEditing(false);
   };
   const onChange = (event) => {
     const {
@@ -23,9 +25,8 @@ const Nweet = ({ NweetObj, isOwner }) => {
     } = event;
     setNewNweet(value);
   };
-
   return (
-    <div key={NweetObj.id}>
+    <div>
       {editing ? (
         <>
           <form onSubmit={onSubmit}>
@@ -33,28 +34,23 @@ const Nweet = ({ NweetObj, isOwner }) => {
               type="text"
               placeholder="Edit your nweet"
               value={newNweet}
-              onChange={onChange}
               required
+              onChange={onChange}
             />
-            <input type="submit" value="Update Tweet" />
+            <input type="submit" value="Update Nweet" />
           </form>
           <button onClick={toggleEditing}>Cancel</button>
         </>
       ) : (
         <>
-          <h4>{NweetObj.text}</h4>
-          {NweetObj.attachmentUrl && (
-            <img
-              alt="attachment"
-              src={NweetObj.attachmentUrl}
-              width="50px"
-              height="50px"
-            />
+          <h4>{nweetObj.text}</h4>
+          {nweetObj.attachmentUrl && (
+            <img src={nweetObj.attachmentUrl} width="50px" height="50px" />
           )}
           {isOwner && (
             <>
               <button onClick={onDeleteClick}>Delete Nweet</button>
-              <button onClick={toggleEditing}>Update Nweet</button>
+              <button onClick={toggleEditing}>Edit Nweet</button>
             </>
           )}
         </>
